@@ -41,4 +41,26 @@ class HorizontalButtonView(ctx:Context,var bitmap: Bitmap,var text:String):View(
             canvas.restore()
         }
     }
+    class Renderer(var v:HorizontalButtonView) {
+        var time = 0
+        var scale:Float = 0.0f
+        var horizontalButton:HorizontalButton?=null
+        fun render(canvas:Canvas,paint:Paint) {
+            if(time == 0) {
+                var w = canvas.width.toFloat()
+                var h = canvas.height.toFloat()
+                var bitmap = Bitmap.createScaledBitmap(v.bitmap,4*canvas.width/5,3*canvas.height/5,true)
+                horizontalButton = HorizontalButton(bitmap,v.text,w,h)
+            }
+            horizontalButton?.draw(canvas,paint,scale)
+            time++
+        }
+        fun handleTap() {
+
+        }
+        fun update(factor:Float) {
+            scale = factor
+            v.postInvalidate()
+        }
+    }
 }
