@@ -1,5 +1,8 @@
 package com.anwesome.ui.kotlinhorizontalbuttonlist
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.*
 import android.view.MotionEvent
@@ -10,12 +13,14 @@ import android.view.View
  */
 class HorizontalButtonView(ctx:Context,var bitmap: Bitmap,var text:String):View(ctx) {
     val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    val renderer = Renderer(this)
     override fun onDraw(canvas:Canvas) {
+        renderer.render(canvas,paint)
     }
     override fun onTouchEvent(event:MotionEvent):Boolean {
         when(event.action) {
             MotionEvent.ACTION_DOWN -> {
-
+                renderer.handleTap()
             }
         }
         return true
@@ -44,6 +49,7 @@ class HorizontalButtonView(ctx:Context,var bitmap: Bitmap,var text:String):View(
     class Renderer(var v:HorizontalButtonView) {
         var time = 0
         var scale:Float = 0.0f
+        var controller = AnimController(this)
         var horizontalButton:HorizontalButton?=null
         fun render(canvas:Canvas,paint:Paint) {
             if(time == 0) {
@@ -56,11 +62,47 @@ class HorizontalButtonView(ctx:Context,var bitmap: Bitmap,var text:String):View(
             time++
         }
         fun handleTap() {
-
+            controller.start()
         }
         fun update(factor:Float) {
             scale = factor
             v.postInvalidate()
+        }
+    }
+    class AnimController(var renderer:Renderer):AnimatorListenerAdapter(),ValueAnimator.AnimatorUpdateListener {
+        val startAnim  = ValueAnimator.ofFloat(0.0f,1.0f)
+        val endAnim = ValueAnimator.ofFloat(1.0f,0.0f)
+        var animated = false
+        var dir = 0
+        init {
+            startAnim.addUpdateListener(this)
+            endAnim.addUpdateListener(this)
+            startAnim.addListener(this)
+            endAnim.addListener(this)
+            startAnim.duration = 200
+            endAnim.duration = 200
+        }
+        override fun onAnimationUpdate(vf:ValueAnimator) {
+            renderer.update(vf.animatedValue as Float)
+        }
+        override fun onAnimationEnd(animator:Animator) {
+            if(animated) {
+                when(dir) {
+                    0 -> {
+                        endAnim.start()
+                    }
+                    1 -> {
+                        animated = false
+                    }
+                }
+                dir = (dir+1)%2
+            }
+        }
+        fun start() {
+            if(!animated && dir == 0) {
+                startAnim.start()
+                animated = true
+            }
         }
     }
 }
