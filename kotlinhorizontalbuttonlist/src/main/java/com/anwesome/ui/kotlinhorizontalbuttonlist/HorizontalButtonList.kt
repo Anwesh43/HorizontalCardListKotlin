@@ -1,10 +1,14 @@
 package com.anwesome.ui.kotlinhorizontalbuttonlist
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Point
 import android.hardware.display.DisplayManager
+import android.view.View
 import android.view.ViewGroup
+import android.widget.HorizontalScrollView
+import android.widget.ScrollView
 
 /**
  * Created by anweshmishra on 05/08/17.
@@ -43,5 +47,28 @@ class HorizontalButtonList(context: Context):ViewGroup(context) {
     fun addButton(bitmap: Bitmap,text:String) {
         var view = HorizontalButtonView(context,bitmap,text)
         addView(view, LayoutParams(w/4,w/4))
+    }
+    companion object {
+        var list:HorizontalButtonList?=null
+        var shown = false
+        fun create(activity:Activity) {
+            if(list == null) {
+                list = HorizontalButtonList(activity)
+            }
+        }
+        fun addButton(bitmap:Bitmap,text:String) {
+            if(!shown) {
+                list?.addButton(bitmap, text)
+            }
+        }
+        fun show(activity: Activity) {
+            if(!shown) {
+                var scrollView = HorizontalScrollView(activity)
+                scrollView.addView(list, LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT))
+                scrollView.isHorizontalScrollBarEnabled = false
+                activity.addContentView(scrollView,LayoutParams(LayoutParams.WRAP_CONTENT,LayoutParams.WRAP_CONTENT))
+                shown = true
+            }
+        }
     }
 }
